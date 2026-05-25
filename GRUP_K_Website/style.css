@@ -92,6 +92,16 @@ body {
     font-weight: 600;
 }
 
+.threshold-info {
+    margin-top: 10px;
+    color: #334155;
+    font-size: 0.95em;
+    background: #eef2ff;
+    border: 1px solid #bfdbfe;
+    padding: 12px 14px;
+    border-radius: 10px;
+}
+
 .form-group input {
     width: 100%;
     padding: 14px 16px;

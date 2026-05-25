@@ -1,4 +1,11 @@
-const BERAT_AMAN = 10; // ton
+const VEHICLE_TYPES = [
+    { key: 'mobil', label: 'Mobil / SUV / MPV', safe: 2, heavy: 3 },
+    { key: 'bus', label: 'Bus / Minibus', safe: 10, heavy: 12 },
+    { key: 'truk-kecil', label: 'Truk Kecil', safe: 5, heavy: 8 },
+    { key: 'truk-sedang', label: 'Truk Sedang', safe: 10, heavy: 15 },
+    { key: 'truk-besar', label: 'Truk Besar', safe: 20, heavy: 30 },
+    { key: 'trailer', label: 'Trailer', safe: 25, heavy: 35 }
+];
 const DEFAULT_LOCATION = { lat: -6.2088, lon: 106.8456, name: 'Jakarta' };
 const OSRM_BASE = 'https://router.project-osrm.org';
 
@@ -116,6 +123,7 @@ function initApp() {
     initGeolocation();
     initDestinationSearch();
     setupFormListener();
+    setupVehicleTypeInfo();
     setupClearButton();
     setupToggleInstructions();
     loadVehicleList();
@@ -293,6 +301,76 @@ function lookupLocalCity(query) {
     return cityDatabase.find(city => city.name === normalized || city.displayName.toLowerCase() === normalized) || null;
 }
 
+function getVehicleType(typeKey) {
+    return VEHICLE_TYPES.find(type => type.key === typeKey) || null;
+}
+
+function setupVehicleTypeInfo() {
+    const vehicleTypeSelect = document.getElementById('jenisKendaraan');
+    const thresholdInfo = document.getElementById('weightThresholdInfo');
+
+    function updateThresholdText() {
+        const vehicleType = getVehicleType(vehicleTypeSelect.value);
+        if (!vehicleType) {
+            thresholdInfo.textContent = 'Pilih jenis kendaraan untuk melihat batas berat aman dan overload.';
+            return;
+        }
+        thresholdInfo.textContent = `Batas aman: hingga ${vehicleType.safe} ton. Batas overload: di atas ${vehicleType.heavy} ton.`;
+    }
+
+    vehicleTypeSelect.addEventListener('change', updateThresholdText);
+    updateThresholdText();
+}
+
+function classifyWeight(typeKey, weight) {
+    const vehicleType = getVehicleType(typeKey);
+    if (!vehicleType) {
+        return {
+            status: 'unknown',
+            category: 'Tidak diketahui',
+            message: 'Jenis kendaraan tidak dikenali.',
+            isOverload: false,
+            maxSafe: null,
+            maxHeavy: null,
+            vehicleTypeLabel: 'Tidak diketahui'
+        };
+    }
+
+    if (weight <= vehicleType.safe) {
+        return {
+            status: 'aman',
+            category: 'Aman',
+            message: `Berat kendaraan ${weight.toFixed(1)} ton masih di dalam batas aman untuk ${vehicleType.label}.`, 
+            isOverload: false,
+            maxSafe: vehicleType.safe,
+            maxHeavy: vehicleType.heavy,
+            vehicleTypeLabel: vehicleType.label
+        };
+    }
+
+    if (weight <= vehicleType.heavy) {
+        return {
+            status: 'berat',
+            category: 'Berat',
+            message: `Berat kendaraan ${weight.toFixed(1)} ton berada di atas batas aman tetapi masih di bawah batas overload untuk ${vehicleType.label}.`, 
+            isOverload: false,
+            maxSafe: vehicleType.safe,
+            maxHeavy: vehicleType.heavy,
+            vehicleTypeLabel: vehicleType.label
+        };
+    }
+
+    return {
+        status: 'overload',
+        category: 'OVERLOAD',
+        message: `Berat kendaraan ${weight.toFixed(1)} ton melebihi batas overload untuk ${vehicleType.label} (${vehicleType.heavy} ton).`, 
+        isOverload: true,
+        maxSafe: vehicleType.safe,
+        maxHeavy: vehicleType.heavy,
+        vehicleTypeLabel: vehicleType.label
+    };
+}
+
 async function findDestinationCoordinates(query) {
     if (isCoordinateInput(query)) {
         const { lat, lon } = parseLatLon(query);
@@ -373,11 +451,12 @@ function setupToggleInstructions() {
 
 async function handleFormSubmit() {
     const platNomor = document.getElementById('platNomor').value.trim();
+    const jenisKendaraan = document.getElementById('jenisKendaraan').value;
     const beratKendaraan = parseFloat(document.getElementById('beratKendaraan').value);
     const destinationQuery = destinationInput.value.trim();
 
-    if (!platNomor || !beratKendaraan || !destinationQuery) {
-        showAlert('Plat nomor, berat, dan tujuan harus diisi.', 'warning');
+    if (!platNomor || !jenisKendaraan || !beratKendaraan || !destinationQuery) {
+        showAlert('Plat nomor, jenis kendaraan, berat, dan tujuan harus diisi.', 'warning');
         return;
     }
 
@@ -385,6 +464,14 @@ async function handleFormSubmit() {
         showAlert('Berat kendaraan harus lebih besar dari 0.', 'warning');
         return;
     }
+
+    const vehicleType = getVehicleType(jenisKendaraan);
+    if (!vehicleType) {
+        showAlert('Jenis kendaraan tidak valid. Pilih jenis kendaraan dari daftar.', 'warning');
+        return;
+    }
+
+    const weightInfo = classifyWeight(jenisKendaraan, beratKendaraan);
 
     const destination = await findDestinationCoordinates(destinationQuery);
     if (!destination || !destination.lat || !destination.lon) {
@@ -401,16 +488,18 @@ async function handleFormSubmit() {
         return;
     }
 
-    const isOverload = beratKendaraan > BERAT_AMAN;
-    showRoute(route, destinationLocation, isOverload);
+    showRoute(route, destinationLocation, weightInfo);
 
     const vehicle = {
         id: Date.now(),
         platNomor: platNomor.toUpperCase(),
+        jenisKendaraan: vehicleType.label,
+        jenisKey: jenisKendaraan,
         beratKendaraan,
+        kategoriBerat: weightInfo.category,
         tujuan: destinationLocation.name,
         routeSummary: `${route.distance.toFixed(1)} km, ${route.duration.toFixed(0)} menit`,
-        status: isOverload ? 'overload' : 'safe',
+        status: weightInfo.status === 'overload' ? 'overload' : 'safe',
         timestamp: new Date().toLocaleString('id-ID')
     };
 
@@ -418,10 +507,10 @@ async function handleFormSubmit() {
     localStorage.setItem('vehicleList', JSON.stringify(vehicleList));
     loadVehicleList();
 
-    if (isOverload) {
-        showAlert(`⚠️ PERINGATAN! Berat ${beratKendaraan} ton melebihi batas aman ${BERAT_AMAN} ton. Ikuti rute dan kurangi muatan jika memungkinkan.`, 'warning');
+    if (weightInfo.isOverload) {
+        showAlert(`⚠️ PERINGATAN! ${weightInfo.message}`, 'warning');
     } else {
-        showAlert('✅ Rute ditemukan. Kendaraan aman untuk dijalankan pada jalur ini.', 'success');
+        showAlert(`✅ ${weightInfo.message}`, 'success');
     }
 }
 
@@ -466,7 +555,7 @@ async function fetchRoute(origin, destination) {
     }
 }
 
-function showRoute(route, destination, isOverload) {
+function showRoute(route, destination, weightInfo) {
     routeSummary.classList.remove('hidden');
     routeInstructions.classList.remove('hidden');
     toggleInstructionsBtn.textContent = 'Sembunyikan';
@@ -496,6 +585,18 @@ function showRoute(route, destination, isOverload) {
             <div>${destination.name}</div>
         </div>
         <div>
+            <strong>Jenis Kendaraan</strong>
+            <div>${weightInfo.vehicleTypeLabel || 'Tidak diketahui'}</div>
+        </div>
+        <div>
+            <strong>Batas aman</strong>
+            <div>${weightInfo.maxSafe ? `${weightInfo.maxSafe.toFixed(1)} ton` : 'N/A'}</div>
+        </div>
+        <div>
+            <strong>Batas overload</strong>
+            <div>${weightInfo.maxHeavy ? `${weightInfo.maxHeavy.toFixed(1)} ton` : 'N/A'}</div>
+        </div>
+        <div>
             <strong>Jarak</strong>
             <div>${route.distance.toFixed(1)} km</div>
         </div>
@@ -504,8 +605,12 @@ function showRoute(route, destination, isOverload) {
             <div>${route.duration.toFixed(0)} menit</div>
         </div>
         <div>
+            <strong>Kategori berat</strong>
+            <div>${weightInfo.category}</div>
+        </div>
+        <div>
             <strong>Status muatan</strong>
-            <div>${isOverload ? 'OVERLOAD - Hati-hati' : 'AMAN'}</div>
+            <div>${weightInfo.isOverload ? 'OVERLOAD - Hati-hati' : 'AMAN'}</div>
         </div>
     `;
 
@@ -548,7 +653,9 @@ function loadVehicleList() {
                 <span class="vehicle-card-plat">${vehicle.platNomor}</span>
                 <span class="vehicle-card-status ${statusClass}">${statusText}</span>
             </div>
+            <div class="vehicle-card-info"><strong>Jenis:</strong> ${vehicle.jenisKendaraan}</div>
             <div class="vehicle-card-info"><strong>Berat:</strong> ${vehicle.beratKendaraan} ton</div>
+            <div class="vehicle-card-info"><strong>Kategori:</strong> ${vehicle.kategoriBerat}</div>
             <div class="vehicle-card-info"><strong>Tujuan:</strong> ${vehicle.tujuan}</div>
             <div class="vehicle-card-info"><strong>Rute:</strong> ${vehicle.routeSummary}</div>
             <div class="vehicle-card-info"><strong>Waktu:</strong> ${vehicle.timestamp}</div>
