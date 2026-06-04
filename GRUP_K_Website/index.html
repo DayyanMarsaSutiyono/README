@@ -107,6 +107,34 @@
                         <ul id="destinationSuggestions" class="autocomplete-list"></ul>
                     </div>
 
+                    <div class="ocr-section">
+                        <h3>OCR Plat Nomor</h3>
+                        <div class="ocr-area" id="ocrArea">
+                            <input type="file" id="plateImageInput" accept="image/*" hidden>
+                            <button type="button" id="plateImageSelectBtn" class="btn-secondary">Pilih Gambar Plat</button>
+                            <div id="ocrDropzone" class="ocr-dropzone" tabindex="0">
+                                <p>Seret & lepas foto plat nomor di sini, atau klik untuk memilih file.</p>
+                                <small>Pastikan plat jelas, tidak buram, dan bagian plat memenuhi frame.</small>
+                            </div>
+                            <div id="ocrPreviewContainer" class="ocr-preview-container hidden">
+                                <canvas id="ocrPreviewCanvas" class="ocr-preview-canvas"></canvas>
+                                <div class="ocr-preview-meta">
+                                    <p id="ocrResultText">Hasil: -</p>
+                                    <p id="ocrConfidenceText">Confidence: -</p>
+                                </div>
+                            </div>
+                            <div id="ocrSpinner" class="ocr-spinner hidden" aria-live="polite"></div>
+                            <div id="ocrStatus" class="ocr-status">Status OCR: belum dijalankan.</div>
+                            <div class="ocr-actions">
+                                <button type="button" id="runOcrBtn" class="btn-secondary">Jalankan OCR</button>
+                                <button type="button" id="resetOcrBtn" class="btn-secondary">Reset Gambar</button>
+                            </div>
+                        </div>
+                        <div id="ocrFallback" class="manual-fallback hidden">
+                            <p>OCR tidak berhasil menemukan plat nomor. Silakan masukkan secara manual pada field Plat Nomor di bawah ini.</p>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label for="platNomor">Plat Nomor:</label>
                         <input type="text" id="platNomor" name="platNomor" placeholder="Contoh: AB 1234 CD" required>
@@ -166,7 +194,9 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
     <script src="auth.js"></script>
     <script src="script.js"></script>
+    <script src="ocr.js"></script>
 </body>
 </html>
