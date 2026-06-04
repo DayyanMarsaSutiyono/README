@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistem Keselamatan Overload Truk</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 420px;
+            width: 100%;
+            padding: 40px 30px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .login-header h1 {
+            font-size: 2em;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+
+        .login-header p {
+            color: #475569;
+            font-size: 0.95em;
+        }
+
+        .login-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            color: #94a3b8;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            position: relative;
+            bottom: -2px;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-btn:hover {
+            color: #0f172a;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #0f172a;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            color: #dc2626;
+            background: #fee2e2;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            display: none;
+            border-left: 4px solid #dc2626;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .icon-sopir {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .icon-publik {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .login-info {
+            background: #f0f9ff;
+            border-left: 4px solid #3b82f6;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            color: #1e40af;
+            margin-top: 15px;
+        }
+
+        .demo-account {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 8px;
+            font-size: 0.85em;
+            color: #475569;
+        }
+
+        .demo-account strong {
+            color: #0f172a;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div style="font-size: 2.5em; margin-bottom: 10px;">🚛</div>
+            <h1>Sistem Keselamatan Overload Truk</h1>
+            <p>Silakan login sebagai Sopir atau Masyarakat Umum</p>
+        </div>
+
+        <div class="login-tabs">
+            <button class="tab-btn active" onclick="switchTab('sopir')">🚗 Sopir</button>
+            <button class="tab-btn" onclick="switchTab('publik')">👥 Masyarakat Umum</button>
+        </div>
+
+        <!-- Login Sopir -->
+        <div id="sopir-tab" class="tab-content active">
+            <div class="error-message" id="sopir-error"></div>
+            <form id="sopir-form" onsubmit="loginSopir(event)">
+                <div class="form-group">
+                    <label for="sopir-email">Email:</label>
+                    <input type="email" id="sopir-email" name="email" placeholder="nama@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="sopir-password">Password:</label>
+                    <input type="password" id="sopir-password" name="password" placeholder="Masukkan password" required>
+                </div>
+                <div class="form-group">
+                    <label for="sopir-nopol">Plat Nomor Kendaraan (Opsional):</label>
+                    <input type="text" id="sopir-nopol" name="nopol" placeholder="Contoh: AB 1234 CD">
+                </div>
+                <button type="submit" class="btn-login">Login sebagai Sopir</button>
+            </form>
+            <div class="login-info">
+                ℹ️ Sebagai sopir, Anda dapat melaporkan kendaraan, mengecek rute aman, dan monitoring perjalanan.
+            </div>
+            <div class="demo-account">
+                <strong>Demo Akun Sopir:</strong><br>
+                Email: sopir@test.com<br>
+                Password: 123456
+            </div>
+        </div>
+
+        <!-- Login Masyarakat Umum -->
+        <div id="publik-tab" class="tab-content">
+            <div class="error-message" id="publik-error"></div>
+            <form id="publik-form" onsubmit="loginPublik(event)">
+                <div class="form-group">
+                    <label for="publik-email">Email:</label>
+                    <input type="email" id="publik-email" name="email" placeholder="nama@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="publik-password">Password:</label>
+                    <input type="password" id="publik-password" name="password" placeholder="Masukkan password" required>
+                </div>
+                <button type="submit" class="btn-login">Login sebagai Masyarakat Umum</button>
+            </form>
+            <div class="login-info">
+                ℹ️ Sebagai masyarakat umum, Anda dapat melaporkan truk yang mengalami overload dan memantau keselamatan jalan.
+            </div>
+            <div class="demo-account">
+                <strong>Demo Akun Publik:</strong><br>
+                Email: publik@test.com<br>
+                Password: 123456
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tab + '-tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function showError(tabType, message) {
+            const errorEl = document.getElementById(tabType + '-error');
+            errorEl.textContent = message;
+            errorEl.classList.add('show');
+            setTimeout(() => {
+                errorEl.classList.remove('show');
+            }, 4000);
+        }
+
+        function loginSopir(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('sopir-email').value;
+            const password = document.getElementById('sopir-password').value;
+            const nopol = document.getElementById('sopir-nopol').value;
+
+            // Demo validation (dalam produksi, validasi di server)
+            if (email === 'sopir@test.com' && password === '123456') {
+                // Simpan session
+                localStorage.setItem('userType', 'sopir');
+                localStorage.setItem('userEmail', email);
+                localStorage.setItem('userNopol', nopol);
+                localStorage.setItem('loginTime', new Date().toISOString());
+                
+                // Redirect ke halaman sopir
+                window.location.href = 'index.html';
+            } else if (email && password) {
+                showError('sopir', '❌ Email atau password salah. Coba gunakan email: sopir@test.com, password: 123456');
+            } else {
+                showError('sopir', '⚠️ Harap isi semua field yang diperlukan');
+            }
+        }
+
+        function loginPublik(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('publik-email').value;
+            const password = document.getElementById('publik-password').value;
+
+            // Demo validation (dalam produksi, validasi di server)
+            if (email === 'publik@test.com' && password === '123456') {
+                // Simpan session
+                localStorage.setItem('userType', 'publik');
+                localStorage.setItem('userEmail', email);
+                localStorage.setItem('loginTime', new Date().toISOString());
+                
+                // Redirect ke halaman publik
+                window.location.href = 'publik.html';
+            } else if (email && password) {
+                showError('publik', '❌ Email atau password salah. Coba gunakan email: publik@test.com, password: 123456');
+            } else {
+                showError('publik', '⚠️ Harap isi semua field yang diperlukan');
+            }
+        }
+
+        // Check jika sudah login
+        window.addEventListener('load', function() {
+            const userType = localStorage.getItem('userType');
+            if (userType === 'sopir') {
+                window.location.href = 'index.html';
+            } else if (userType === 'publik') {
+                window.location.href = 'publik.html';
+            }
+        });
+    </script>
+</body>
+</html>

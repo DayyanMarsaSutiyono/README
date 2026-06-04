@@ -6,12 +6,86 @@
     <title>Sistem Keselamatan Overload Truk</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
     <link rel="stylesheet" href="style.css">
+    <style>
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .header-title {
+            flex: 1;
+        }
+
+        .header-title h1 {
+            margin-bottom: 10px;
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 5px;
+        }
+
+        #userInfo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9em;
+            color: #e0e7ff;
+        }
+
+        .user-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .user-email {
+            color: #c7d2fe;
+        }
+
+        .btn-logout {
+            padding: 8px 16px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 900px) {
+            .header {
+                flex-direction: column;
+            }
+
+            .header-user {
+                width: 100%;
+                margin-top: 15px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <h1>🚛 Sistem Keselamatan Overload Truk</h1>
-            <p>Routing realistis untuk truk, deteksi overload, dan rekomendasi jalur aman.</p>
+            <div class="header-title">
+                <h1>🚛 Sistem Keselamatan Overload Truk</h1>
+                <p>Routing realistis untuk truk, deteksi overload, dan rekomendasi jalur aman.</p>
+            </div>
+            <div class="header-user">
+                <div id="userInfo"></div>
+                <button class="btn-logout" onclick="logoutUser()">Logout</button>
+            </div>
         </header>
 
         <div class="main-content">
@@ -92,6 +166,7 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script src="auth.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

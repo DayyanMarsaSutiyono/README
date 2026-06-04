@@ -1,3 +1,11 @@
+// Authentication check
+(function() {
+    const userType = localStorage.getItem('userType');
+    if (userType !== 'sopir') {
+        window.location.href = 'login.html';
+    }
+})();
+
 const VEHICLE_TYPES = [
     { key: 'mobil', label: 'Mobil / SUV / MPV', safe: 2, heavy: 3 },
     { key: 'bus', label: 'Bus / Minibus', safe: 10, heavy: 12 },
