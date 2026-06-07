@@ -79,14 +79,56 @@
     <div class="container">
         <header class="header">
             <div class="header-title">
-                <h1>🚛 Sistem Keselamatan Overload Truk</h1>
-                <p>Routing realistis untuk truk, deteksi overload, dan rekomendasi jalur aman.</p>
+                <h1>🚛 Sistem Klasifikasi Berat Kendaraan</h1>
+                <p>Analisis berat berdasarkan jenis kendaraan, deteksi overload, dan peta rute untuk perjalanan lebih aman.</p>
             </div>
             <div class="header-user">
                 <div id="userInfo"></div>
                 <button class="btn-logout" onclick="logoutUser()">Logout</button>
             </div>
         </header>
+
+        <section class="classification-overview">
+            <h2>📌 Klasifikasi Berat Kendaraan</h2>
+            <div class="classification-grid">
+                <div class="classification-card">
+                    <h3>Mobil / SUV / MPV</h3>
+                    <p>Aman: ≤ 2 ton</p>
+                    <p>Berat: 2–3 ton</p>
+                    <p>Overload: > 3 ton</p>
+                </div>
+                <div class="classification-card">
+                    <h3>Bus / Minibus</h3>
+                    <p>Aman: ≤ 10 ton</p>
+                    <p>Berat: 10–12 ton</p>
+                    <p>Overload: > 12 ton</p>
+                </div>
+                <div class="classification-card">
+                    <h3>Truk Kecil</h3>
+                    <p>Aman: ≤ 5 ton</p>
+                    <p>Berat: 5–8 ton</p>
+                    <p>Overload: > 8 ton</p>
+                </div>
+                <div class="classification-card">
+                    <h3>Truk Sedang</h3>
+                    <p>Aman: ≤ 10 ton</p>
+                    <p>Berat: 10–15 ton</p>
+                    <p>Overload: > 15 ton</p>
+                </div>
+                <div class="classification-card">
+                    <h3>Truk Besar</h3>
+                    <p>Aman: ≤ 20 ton</p>
+                    <p>Berat: 20–30 ton</p>
+                    <p>Overload: > 30 ton</p>
+                </div>
+                <div class="classification-card">
+                    <h3>Trailer</h3>
+                    <p>Aman: ≤ 25 ton</p>
+                    <p>Berat: 25–35 ton</p>
+                    <p>Overload: > 35 ton</p>
+                </div>
+            </div>
+        </section>
 
         <div class="main-content">
             <section class="form-section">

@@ -1,12 +1,3 @@
-// Authentication check
-(function() {
-    const userType = localStorage.getItem('userType');
-    if (userType !== 'sopir') {
-        window.location.href = 'login.html';
-    }
-})();
-
-const VEHICLE_DATA_KEY = 'vehicleData';
 const VEHICLE_TYPES = [
     { key: 'mobil', label: 'Mobil / SUV / MPV', safe: 2, heavy: 3 },
     { key: 'bus', label: 'Bus / Minibus', safe: 10, heavy: 12 },
@@ -117,7 +108,7 @@ let routeLayer;
 let userLocation = null;
 let destinationLocation = null;
 let selectingOnMap = false;
-let vehicleList = JSON.parse(localStorage.getItem('vehicleList')) || JSON.parse(localStorage.getItem(VEHICLE_DATA_KEY)) || [];
+let vehicleList = JSON.parse(localStorage.getItem('vehicleList')) || [];
 
 const destinationInput = document.getElementById('destinationInput');
 const destinationSuggestions = document.getElementById('destinationSuggestions');
@@ -445,7 +436,6 @@ function setupClearButton() {
         if (confirm('Apakah Anda yakin ingin menghapus semua data kendaraan?')) {
             vehicleList = [];
             localStorage.removeItem('vehicleList');
-            localStorage.removeItem(VEHICLE_DATA_KEY);
             loadVehicleList();
             showAlert('Semua data kendaraan telah dihapus.', 'success');
         }
@@ -515,7 +505,6 @@ async function handleFormSubmit() {
 
     vehicleList.unshift(vehicle);
     localStorage.setItem('vehicleList', JSON.stringify(vehicleList));
-    localStorage.setItem(VEHICLE_DATA_KEY, JSON.stringify(vehicleList));
     loadVehicleList();
 
     if (weightInfo.isOverload) {
