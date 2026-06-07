@@ -256,6 +256,7 @@
                 flex-direction: column;
             }
         }
+            </style>
 </head>
 <body>
     <div class="publik-container">
@@ -292,6 +293,15 @@
                 <div class="stat-card">
                     <div class="stat-label">Persentase Overload</div>
                     <div class="stat-value" id="statPercent">0%</div>
+                </div>
+            </div>
+
+            <div class="verified-section">
+                <div class="stat-card" style="grid-column: 1 / -1;">
+                    <div class="stat-label">Daftar Kendaraan Terverifikasi</div>
+                    <div id="verifiedList" class="stat-value" style="font-size:1rem; font-weight:400; color:#0f172a;">
+                        <p style="color:#475569; margin:0;">Memuat data terverifikasi...</p>
+                    </div>
                 </div>
             </div>
 
@@ -372,8 +382,46 @@
             }).addTo(map);
         }
 
+        function getVerifiedVehicleData() {
+            // Support both keys used in different pages: 'vehicleList' and 'vehicleData'
+            const raw1 = localStorage.getItem('vehicleList');
+            const raw2 = localStorage.getItem(VEHICLE_DATA_KEY);
+            let combined = [];
+
+            try {
+                if (raw1) {
+                    const d1 = JSON.parse(raw1);
+                    if (Array.isArray(d1)) combined = combined.concat(d1);
+                }
+            } catch (e) {
+                // ignore
+            }
+
+            try {
+                if (raw2) {
+                    const d2 = JSON.parse(raw2);
+                    if (Array.isArray(d2)) combined = combined.concat(d2);
+                }
+            } catch (e) {
+                // ignore
+            }
+
+            // Normalize entries and filter verified
+            const normalized = combined
+                .filter(v => v && typeof v === 'object')
+                .map(v => ({
+                    platNomor: v.platNomor || v.plate || v.plateNumber || v.id || '',
+                    jenisKendaraan: v.jenisKendaraan || v.type || v.vehicleType || '',
+                    beratKendaraan: v.beratKendaraan || v.weight || v.berat || '',
+                    status: v.status || (v.verified ? 'verified' : (v.isOverload ? 'overload' : 'registered')),
+                    verified: v.verified === true || v.status === 'verified' || v.verified === 'true'
+                }));
+
+            return normalized.filter(v => v.verified === true || v.status === 'verified');
+        }
+
         function updateStatistics() {
-            const data = getVehicleData();
+            const data = getVerifiedVehicleData();
             const total = data.length;
             const overload = data.filter(v => v.status === 'overload').length;
             const percent = total === 0 ? 0 : Math.round((overload / total) * 100);
@@ -381,6 +429,8 @@
             document.getElementById('statTotal').textContent = total;
             document.getElementById('statOverload').textContent = overload;
             document.getElementById('statPercent').textContent = `${percent}%`;
+
+            renderVerifiedList(data);
         }
 
         function searchRoute() {
@@ -400,7 +450,7 @@
         }
 
         function analyzeRoute(route) {
-            const data = getVehicleData();
+            const data = getVerifiedVehicleData();
             const overloadCount = data.filter(v => v.status === 'overload').length;
             const totalCount = data.length;
             const riskPercent = totalCount === 0 ? 0 : Math.round((overloadCount / totalCount) * 100);
@@ -519,7 +569,7 @@
                 return;
             }
 
-            const data = getVehicleData();
+            const data = getVerifiedVehicleData();
             const newOverloadCount = data.filter(v => v.status === 'overload').length;
 
             if (newOverloadCount > currentRouteData.overloadCount) {
@@ -553,6 +603,39 @@
             } catch (err) {
                 return [];
             }
+        }
+
+        function renderVerifiedList(data) {
+            const container = document.getElementById('verifiedList');
+            if (!container) return;
+            if (!data || data.length === 0) {
+                container.innerHTML = '<p style="color:#475569; margin:0;">Tidak ada kendaraan terverifikasi.</p>';
+                return;
+            }
+
+            // Build simple list
+            const list = document.createElement('div');
+            list.style.display = 'grid';
+            list.style.gridTemplateColumns = 'repeat(auto-fit, minmax(220px, 1fr))';
+            list.style.gap = '10px';
+
+            data.forEach(v => {
+                const card = document.createElement('div');
+                card.style.background = 'white';
+                card.style.padding = '10px';
+                card.style.borderRadius = '8px';
+                card.style.boxShadow = '0 2px 10px rgba(0,0,0,0.06)';
+                card.innerHTML = `
+                    <div style="font-weight:700; color:#0f172a;">${v.platNomor || v.plate || 'Plat tidak tersedia'}</div>
+                    <div style="color:#475569; font-size:0.9em;">${v.jenisKendaraan || v.type || '-'}</div>
+                    <div style="color:#475569; font-size:0.9em; margin-top:6px;">Berat: ${v.beratKendaraan || v.weight || '-'} Ton</div>
+                    <div style="margin-top:8px; font-weight:600; color:${v.status === 'overload' ? '#b91c1c' : '#166534'}">${v.status || (v.verified ? 'TERVERIFIKASI' : 'TERDAFTAR')}</div>
+                `;
+                list.appendChild(card);
+            });
+
+            container.innerHTML = '';
+            container.appendChild(list);
         }
 
         // Update user info for publik
